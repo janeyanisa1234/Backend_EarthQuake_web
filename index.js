@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const earthquakeRoutes = require('./projectRoute/earthquakeroute'); // แก้ไขตรงนี้
 const mongoose = require('mongoose');
 const pga = require('./projectRoute/pga');
@@ -18,12 +19,13 @@ app.get('/', (req, res) => {
     res.send('สวัสดี Express!!!');
 });
 
+app.use(cors());
 // เส้นทางทั้งหมด
 app.use('/earthquakes', earthquakeRoutes); 
 app.use('/city', citythailand);
 app.use('/haversine', haversineRoutes);
 app.use('/pga', pga);
 app.use('/building', building);
-app.use('/telegram', telegram);
+//app.use('/telegram', telegram);
 
 app.listen(PORT, ()=> console.log(`Server running at http://localhost:${PORT}`));

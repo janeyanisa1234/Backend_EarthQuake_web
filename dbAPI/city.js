@@ -13,7 +13,7 @@ db.connect((err) => {
     console.error('Error connecting to MySQL:', err.message);
     return;
   }
-  console.log('Connected to MySQL database: testcity');
+  //console.log('Connected to MySQL database: testcity');
 });
 
 // ฟังก์ชันบันทึกข้อมูลจังหวัดและอำเภอ
