@@ -3,7 +3,7 @@ const app = express();
 const cors = require('cors');
 const earthquakeRoutes = require('./projectRoute/earthquakeroute'); // แก้ไขตรงนี้
 const mongoose = require('mongoose');
-const pga = require('./projectRoute/pga');
+//const pga = require('./projectRoute/pga');
 const building = require('./projectRoute/building');
 const haversineRoutes = require('./projectRoute/haversineroute');
 const citythailand = require('./projectRoute/city');
@@ -24,8 +24,9 @@ app.use(cors());
 app.use('/earthquakes', earthquakeRoutes); 
 app.use('/city', citythailand);
 app.use('/haversine', haversineRoutes);
-app.use('/pga', pga);
+//app.use('/pga', pga);
 app.use('/building', building);
+app.use('/citythailand',citythailand);
 //app.use('/telegram', telegram);
 
 app.listen(PORT, ()=> console.log(`Server running at http://localhost:${PORT}`));

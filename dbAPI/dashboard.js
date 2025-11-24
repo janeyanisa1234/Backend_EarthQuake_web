@@ -5,7 +5,7 @@ async function Connection() {
     const connection = await mysql.createConnection({
         host: 'localhost',
         user: 'root',
-        password: '6530300783',
+        password: '',
         database: 'earthquake'
     });
     console.log('Connected to MySQL database: earthquake');

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { createConnection, getLatestEarthquakeData, calculateBangkokRisk, getRisksForDate, getTodayRiskAreas, getEarthquakesByDate } = require('../dbAPI/earthquake');
+const { createConnection, getLatestEarthquakeData, calculateBangkokRisk, getRisksForDate, getTodayRiskAreas, getEarthquakesByDate, getRisksByEarthquakeId  } = require('../dbAPI/earthquake');
 const { Dashboard } = require('../dbAPI/dashboard');
 
+
+//เก่า
 router.get('/connect', async (req, res) => {
   try {
     const connection = await createConnection();
@@ -85,7 +87,7 @@ router.get('/today-risk-areas', async (req, res) => {
         time: row.time
       }
     }));
-    res.json(riskAreas); // ส่ง array ว่างถ้า results.length === 0
+    res.json(riskAreas); // ส่ง array ว่างถ้า results.length === 0 จะได้ไม่ error
   } catch (error) {
     console.error('Error fetching today\'s risk areas:', error);
     res.status(500).json({ message: 'Error fetching risk areas', error: error.message });
@@ -100,6 +102,34 @@ router.get('/earthquakes', async (req, res) => {
   } catch (error) {
     console.error('Error fetching earthquakes:', error);
     res.status(500).json({ message: 'Error fetching earthquake data', error: error.message });
+  }
+});
+
+router.get('/risk-by-earthquake', async (req, res) => {
+  const { earthquake_id } = req.query;
+  if (!earthquake_id) {
+    return res.status(400).json({ error: 'Earthquake ID is required' });
+  }
+  try {
+    const risks = await getRisksByEarthquakeId(earthquake_id);
+    const riskAreas = risks.map(row => ({
+      district_name: row.district_name,
+      risk_level: row.risk_level,
+      pga: row.pga,
+      distance_km: row.distance_km,
+      high_rise_count: row.high_rise_count,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      earthquake: {
+        magnitude: row.magnitude,
+        place: row.place,
+        time: row.time
+      }
+    }));
+    res.json(riskAreas);
+  } catch (error) {
+    console.error('Error fetching risk data by earthquake ID:', error);
+    res.status(500).json({ error: 'Failed to fetch risk data', message: error.message });
   }
 });
 

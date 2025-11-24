@@ -1,4 +1,5 @@
-const mysql = require('mysql2/promise');
+require('dotenv').config();
+const { createConnection } = require('./db.js');   // <<--- ใช้ db.js
 const fs = require('fs').promises;
 const path = require('path');
 const fetch = require('node-fetch');
@@ -14,21 +15,8 @@ function generateRandomId(length = 25) {
   return result;
 }
 
-async function createConnection() {
-  try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root',
-      password: '6530300783',
-      database: 'earthquake'
-    });
-    console.log('Connected to MySQL database: earthquake');
-    return connection;
-  } catch (error) {
-    console.error('Failed to connect to MySQL:', error.message);
-    throw error;
-  }
-}
+// ❌ ลบ createConnection() เดิมทั้งหมดออก
+// ใช้ createConnection จาก db.js แทน
 
 function haversineDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -59,7 +47,7 @@ async function getBangkokDistricts(connection) {
   const [results] = await connection.execute(`
     SELECT d.id, d.name, d.latitude, d.longitude
     FROM districts d
-    JOIN provinces p ON d.provinceCode = p.provinces_Num
+    JOIN provinces p ON d.provincesCode = p.provinces_Num
     WHERE p.provinces_Num = 10
   `);
   if (results.length === 0) {
@@ -142,7 +130,7 @@ async function getCentroidCoordinates(nodes, jsonData) {
 }
 
 function generateMockEarthquakeData() {
-  const FIXED_TIMESTAMP = 1718074860000;
+  const FIXED_TIMESTAMP = 1749999120000;
   return [{
     type: "Feature",
     properties: {
@@ -433,8 +421,7 @@ async function getTodayRiskAreas() {
 
     if (results.length === 0) {
       console.log('No risk data for today, fetching all risk areas');
-      [results] = await connection.execute(`
-        SELECT 
+      [results] = await connection.execute(`SELECT 
           dr.district_name,
           dr.risk_level,
           dr.pga,
@@ -548,6 +535,35 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
+async function getRisksByEarthquakeId(earthquakeId) {
+  const connection = await createConnection();
+  try {
+    const [rows] = await connection.execute(`
+      SELECT 
+        dr.district_name,
+        dr.risk_level,
+        dr.pga,
+        dr.distance_km,
+        dr.high_rise_count,
+        d.latitude,
+        d.longitude,
+        e.magnitude,
+        e.place,
+        e.time
+      FROM district_risks dr
+      JOIN districts d ON dr.district_id = d.id
+      JOIN earthquakes e ON dr.earthquake_id = e.id
+      WHERE dr.earthquake_id = ?
+    `, [earthquakeId]);
+    return rows;
+  } catch (error) {
+    console.error('Error fetching risks for earthquake ID:', error.message);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+}
+
 runContinuously();
 
 module.exports = {
@@ -556,5 +572,6 @@ module.exports = {
   calculateBangkokRisk,
   getRisksForDate,
   getTodayRiskAreas,
-  getEarthquakesByDate
+  getEarthquakesByDate,
+  getRisksByEarthquakeId
 };

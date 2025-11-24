@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise');
+/*const mysql = require('mysql2/promise');
 const TelegramBot = require('node-telegram-bot-api');
 require('dotenv').config();
 
@@ -44,7 +44,7 @@ async function createConnection() {
   const connection = await mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '6530300783',
+    password: '',
     database: 'earthquake'
   });
   console.log('Connected to MySQL database: earthquake');
@@ -77,7 +77,7 @@ const sendMainMenu = (chatId) => {
 
 // ฟังก์ชันส่งแจ้งเตือนแผ่นดินไหวไปยังผู้ใช้ทั้งหมด
 async function sendEarthquakeAlert(earthquake, riskDistricts, connection) {
-  const [subscribers] = await connection.execute('SELECT chat_id FROM UserChatBot');
+  const [subscribers] = await connection.execute('SELECT chat_id FROM users');
   if (subscribers.length === 0) {
     console.error('No subscribers found');
     return;
@@ -190,7 +190,7 @@ bot.onText(/\/start/, async (msg) => {
   let connection;
   try {
     connection = await createConnection();
-    await connection.execute('INSERT INTO UserChatBot (chat_id) VALUES (?)', [chatId]);
+    await connection.execute('INSERT INTO users (chat_id) VALUES (?)', [chatId]);
     bot.sendMessage(
       chatId,
       '*ยินดีต้อนรับสู่ Earthquake Bot! 🌍*\nบอทนี้ช่วยให้คุณทราบข้อมูลเกี่ยวกับแผ่นดินไหวและความปลอดภัย\nคุณสมัครรับการแจ้งเตือนแผ่นดินไหวเรียบร้อย!\n*เริ่มต้นโดยเลือกตัวเลือกจากเมนู!*',
@@ -220,7 +220,7 @@ bot.onText(/\/subscribe/, async (msg) => {
   let connection;
   try {
     connection = await createConnection();
-    await connection.execute('INSERT INTO UserChatBot (chat_id) VALUES (?)', [chatId]);
+    await connection.execute('INSERT INTO users (chat_id) VALUES (?)', [chatId]);
     bot.sendMessage(chatId, 'สมัครรับการแจ้งเตือนแผ่นดินไหวเรียบร้อย!', { parse_mode: 'Markdown' });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
@@ -240,7 +240,7 @@ bot.onText(/\/unsubscribe/, async (msg) => {
   let connection;
   try {
     connection = await createConnection();
-    const [result] = await connection.execute('DELETE FROM UserChatBot WHERE chat_id = ?', [chatId]);
+    const [result] = await connection.execute('DELETE FROM  users WHERE chat_id = ?', [chatId]);
     if (result.affectedRows > 0) {
       bot.sendMessage(chatId, 'ยกเลิกการสมัครรับการแจ้งเตือนเรียบร้อย!', { parse_mode: 'Markdown' });
     } else {
@@ -270,7 +270,7 @@ bot.on('callback_query', async (query) => {
     connection = await createConnection();
     if (data.startsWith('watch_areas_')) {
       const earthquakeId = data.split('_')[2];
-      let message = `*🌆 พื้นที่เฝ้าระวังแผ่นดินไหว*\n\n` +
+      let message = `*พื้นที่เฝ้าระวังแผ่นดินไหว*\n\n` +
                     `*ระดับความเสี่ยงและความหมาย:*\n`;
       for (const [level, description] of Object.entries(riskLevelDescriptions)) {
         message += `- *${level}*: ${description}\n`;
@@ -309,7 +309,7 @@ bot.on('callback_query', async (query) => {
             const timeFormatted = new Date(latest[0].time).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' });
             bot.sendMessage(
               chatId,
-              `*📍 ข้อมูลแผ่นดินไหวล่าสุด*\n- *สถานที่*: ${latest[0].place}\n- *ขนาด*: ${latest[0].magnitude} ริกเตอร์\n- *เวลา*: ${timeFormatted}\n- *ความลึก*: ${latest[0].depth} กม.`,
+              `*ข้อมูลแผ่นดินไหวล่าสุด*\n- *สถานที่*: ${latest[0].place}\n- *ขนาด*: ${latest[0].magnitude} ริกเตอร์\n- *เวลา*: ${timeFormatted}\n- *ความลึก*: ${latest[0].depth} กม.`,
               { parse_mode: 'Markdown' }
             );
           }
@@ -347,7 +347,7 @@ bot.on('callback_query', async (query) => {
 
           bot.sendMessage(
             chatId,
-            `*🌆 พื้นที่เสี่ยงใกล้แผ่นดินไหวล่าสุด (${location})*\n\n${riskDistrictsMessage}`,
+            `*พื้นที่เสี่ยงใกล้แผ่นดินไหวล่าสุด (${location})*\n\n${riskDistrictsMessage}`,
             { parse_mode: 'Markdown' }
           );
           break;
@@ -357,7 +357,7 @@ bot.on('callback_query', async (query) => {
               chatId,
               'photo/safety.gif',
               {
-                caption: `*🛡️ แนวทางการรับมือแผ่นดินไหว*`,
+                caption: `*แนวทางการรับมือแผ่นดินไหว*`,
                 parse_mode: 'Markdown'
               }
             );
@@ -365,7 +365,7 @@ bot.on('callback_query', async (query) => {
             console.error('Error sending safety image:', error.message);
             bot.sendMessage(
               chatId,
-              `*🛡️ แนวทางการรับมือแผ่นดินไหว*\n\n*ขออภัย ไม่สามารถแสดงรูปภาพได้*`,
+              `*แนวทางการรับมือแผ่นดินไหว*\n\n*ขออภัย ไม่สามารถแสดงรูปภาพได้*`,
               { parse_mode: 'Markdown' }
             );
           }
@@ -373,7 +373,7 @@ bot.on('callback_query', async (query) => {
         case 'support':
           bot.sendMessage(
             chatId,
-            `*📞 เกี่ยวกับฉัน*\nสวัสดีจ้า ฉันคือ chatbot Earthquake warning  แจ้งเตือนแผ่นดินไหว คุณจะได้รับการแจ้งเตือนแผ่นดินไหวเมื่อเพิ่มเพื่อนกับฉัน คุณสามารถติดต่อสอบถามฉันได้ที่ช่องทางด้านล่างจ้า\n- 📧 อีเมล: earthquakerisks@bot.com\n- 📱 โทร: 123-456-7890`,
+            `*เกี่ยวกับฉัน*\nสวัสดีจ้า ฉันคือ chatbot Earthquake warning  แจ้งเตือนแผ่นดินไหว คุณจะได้รับการแจ้งเตือนแผ่นดินไหวเมื่อเพิ่มเพื่อนกับฉัน คุณสามารถติดต่อสอบถามฉันได้ที่ช่องทางด้านล่างจ้า\n- 📧 อีเมล: earthquakerisks@bot.com\n- 📱 โทร: 123-456-7890`,
             { parse_mode: 'Markdown' }
           );
           break;
@@ -416,4 +416,4 @@ setInterval(checkForNewEarthquakes, 1000);
 // รันการตรวจจับครั้งแรกเมื่อบอทเริ่มทำงาน
 checkForNewEarthquakes();
 
-module.exports = bot;
+module.exports = bot;*/
