@@ -17,4 +17,4 @@ function calculateHaversine({ coord1, coord2 }) {
   };
 }
 
-module.exports = { calculateHaversine }; // ✅ export แบบนี้
+module.exports = { calculateHaversine }; //  export แบบนี้

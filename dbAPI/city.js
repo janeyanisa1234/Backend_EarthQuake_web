@@ -4,7 +4,7 @@ const { Country, State, City } = require('country-state-city');
 const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '6530300783',
+  password: '',
   database: 'earthquake'
 });
 
@@ -13,7 +13,7 @@ db.connect((err) => {
     console.error('Error connecting to MySQL:', err.message);
     return;
   }
-  console.log('Connected to MySQL database: testcity');
+  //console.log('Connected to MySQL database: testcity');
 });
 
 // ฟังก์ชันบันทึกข้อมูลจังหวัดและอำเภอ
@@ -53,7 +53,7 @@ function saveProvincesAndDistricts(callback) {
     const districts = City.getCitiesOfCountry('TH');
     districts.forEach((district) => {
       db.query(
-        `INSERT INTO districts (name, provinceCode, latitude, longitude) VALUES (?, ?, ?, ?)`,
+        `INSERT INTO districts (name, provincesCode, latitude, longitude) VALUES (?, ?, ?, ?)`,
         [district.name, district.stateCode, district.latitude || '', district.longitude || ''],
         (err) => {
           if (err) {

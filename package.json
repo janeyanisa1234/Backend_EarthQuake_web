@@ -12,12 +12,15 @@
   "description": "��#\u0000 \u0000F\u0000o\u0000n\u0000t\u0000e\u0000n\u0000d\u0000-\u0000E\u0000a\u0000r\u0000t\u0000h\u0000Q\u0000u\u0000a\u0000k\u0000e\u0000-\u0000w\u0000e\u0000b\u0000\r\u0000 \u0000#\u0000 \u0000B\u0000a\u0000c\u0000k\u0000e\u0000n\u0000s\u0000_\u0000E\u0000a\u0000r\u0000t\u0000h\u0000Q\u0000u\u0000a\u0000k\u0000e\u0000_\u0000w\u0000e\u0000b\u0000\r\u0000 \u0000",
   "dependencies": {
     "axios": "^1.9.0",
+    "cors": "^2.8.5",
     "country-state-city": "^3.2.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mongodb": "^6.16.0",
     "mongoose": "^8.14.1",
+    "mssql": "^11.0.1",
     "mysql2": "^3.14.1",
+    "node-fetch": "^2.7.0",
     "node-telegram-bot-api": "^0.66.0"
   },
   "devDependencies": {
